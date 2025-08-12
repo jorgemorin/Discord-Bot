@@ -27,7 +27,7 @@ class DiscordBot:
             return True
         return False
 
-    async def send_poll(self, channel_id: int, question: str, timeout: Optional[int] = None) -> Optional[bool]:
+    async def send_poll(self, channel_id: int, title: str, description: str, timeout: Optional[int] = None) -> Optional[bool]:
         channel = self.bot.get_channel(channel_id)
         
         # Emojis unicode for reaction
@@ -36,7 +36,8 @@ class DiscordBot:
 
         if channel:
             try:
-                message = await channel.send(question)
+                embed = discord.Embed(title=title, description=description, color=discord.Color.green())
+                message = await channel.send(embed=embed)
                 await message.add_reaction(true_emoji)
                 await message.add_reaction(false_emoji)
 
@@ -58,8 +59,17 @@ class DiscordBot:
                     if timeout:
                         elapsed = asyncio.get_event_loop().time() - start_time
                         if elapsed > timeout:
-                            await message.reply("Poll timed out.")
+                            # i want to response to the message that the poll has timed out
+                            await message.reply("Poll Timeout")
                             return None
             except Exception as e:
                 print(f"An error occurred: {e}")
                 return None
+
+    async def send_embed(self, channel_id: int, title: str, description: str):
+        channel = self.bot.get_channel(channel_id)
+        if channel:
+            embed = discord.Embed(title=title, description=description, color=discord.Color.blue())
+            await channel.send(embed=embed)
+            return True
+        return False
