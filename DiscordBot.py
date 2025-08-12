@@ -36,7 +36,7 @@ class DiscordBot:
 
         if channel:
             try:
-                embed = discord.Embed(title=title, description=description, color=discord.Color.green())
+                embed = discord.Embed(title=title, description=description, color=discord.Color.blue())
                 message = await channel.send(embed=embed)
                 await message.add_reaction(true_emoji)
                 await message.add_reaction(false_emoji)
@@ -52,15 +52,34 @@ class DiscordBot:
                     true_count = sum(reaction.count for reaction in reactions if str(reaction.emoji) == true_emoji)
                     false_count = sum(reaction.count for reaction in reactions if str(reaction.emoji) == false_emoji)
                     if true_count > false_count:
+                        true_embed = discord.Embed(
+                            title=title,
+                            description=description + "\n\n** Poll result: \U00002705 **",
+                            color=discord.Color.green()
+                        )
+                        await message.clear_reactions()
+                        await message.edit(embed=true_embed)
                         return True
                     elif false_count > true_count:
+                        false_embed = discord.Embed(
+                            title=title,
+                            description=description + "\n\n** Poll result: \U0000274C **",
+                            color=discord.Color.red()
+                        )
+                        await message.clear_reactions()
+                        await message.edit(embed=false_embed)
                         return False
 
                     if timeout:
                         elapsed = asyncio.get_event_loop().time() - start_time
                         if elapsed > timeout:
-                            # i want to response to the message that the poll has timed out
-                            await message.reply("Poll Timeout")
+                            timeout_embed = discord.Embed(
+                                title=title,
+                                description=description+ "\n\n** \U0001F534  Poll timed out!**",
+                                color=discord.Color.red()
+                            )
+                            await message.clear_reactions()
+                            await message.edit(embed = timeout_embed)
                             return None
             except Exception as e:
                 print(f"An error occurred: {e}")
